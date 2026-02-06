@@ -18,8 +18,8 @@ export default function ManagerDashboard() {
             if (!token) return;
 
             const url = locationId
-                ? `http://localhost:8000/api/manager/supervisors?location_id=${locationId}`
-                : `http://localhost:8000/api/manager/supervisors`;
+                ? `/api/manager/supervisors?location_id=${locationId}`
+                : `/api/manager/supervisors`;
 
             const response = await fetch(url, {
                 headers: {
