@@ -61,7 +61,7 @@ const MobileChecklist: React.FC<MobileChecklistProps> = ({ supervisor, onNavigat
         try {
             const token = localStorage.getItem('auth_token');
             const dateStr = selectedDate.toLocaleDateString('en-CA');
-            const res = await fetch(`http://localhost:8000/api/supervisor/${supervisor.id}/tasks?date=${dateStr}`, {
+            const res = await fetch(`/api/supervisor/${supervisor.id}/tasks?date=${dateStr}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -78,7 +78,7 @@ const MobileChecklist: React.FC<MobileChecklistProps> = ({ supervisor, onNavigat
         // Usually supervisor can delete their own proof before approval)
         try {
             const token = localStorage.getItem('auth_token');
-            const res = await fetch(`http://localhost:8000/api/tasks/${taskId}/proof`, {
+            const res = await fetch(`/api/tasks/${taskId}/proof`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -127,7 +127,7 @@ const MobileChecklist: React.FC<MobileChecklistProps> = ({ supervisor, onNavigat
 
         try {
             const token = localStorage.getItem('auth_token');
-            const res = await fetch(`http://localhost:8000/api/tasks/${uploadingTaskId}/proof`, {
+            const res = await fetch(`/api/tasks/${uploadingTaskId}/proof`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` },
                 body: formData

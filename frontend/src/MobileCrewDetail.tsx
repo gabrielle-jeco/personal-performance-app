@@ -29,7 +29,7 @@ const MobileCrewDetail: React.FC<MobileCrewDetailProps> = ({ crew, onNavigate })
         try {
             const token = localStorage.getItem('auth_token');
             const dateStr = selectedDate.toLocaleDateString('en-CA');
-            const res = await fetch(`http://localhost:8000/api/supervisor/${crew.id}/tasks?date=${dateStr}`, {
+            const res = await fetch(`/api/supervisor/${crew.id}/tasks?date=${dateStr}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -45,7 +45,7 @@ const MobileCrewDetail: React.FC<MobileCrewDetailProps> = ({ crew, onNavigate })
     const handleAddTask = async (taskData: any) => {
         try {
             const token = localStorage.getItem('auth_token');
-            const res = await fetch('http://localhost:8000/api/tasks', {
+            const res = await fetch('/api/tasks', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -68,7 +68,7 @@ const MobileCrewDetail: React.FC<MobileCrewDetailProps> = ({ crew, onNavigate })
         setTasks(tasks.map(t => t.task_id === task.task_id ? { ...t, status: newStatus } : t));
         try {
             const token = localStorage.getItem('auth_token');
-            await fetch(`http://localhost:8000/api/tasks/${task.task_id}/status`, {
+            await fetch(`/api/tasks/${task.task_id}/status`, {
                 method: 'PATCH',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -87,7 +87,7 @@ const MobileCrewDetail: React.FC<MobileCrewDetailProps> = ({ crew, onNavigate })
         if (!window.confirm("Delete this task?")) return;
         try {
             const token = localStorage.getItem('auth_token');
-            await fetch(`http://localhost:8000/api/tasks/${taskId}`, {
+            await fetch(`/api/tasks/${taskId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -101,7 +101,7 @@ const MobileCrewDetail: React.FC<MobileCrewDetailProps> = ({ crew, onNavigate })
     const handleDeleteProof = async (taskId: number) => {
         try {
             const token = localStorage.getItem('auth_token');
-            const res = await fetch(`http://localhost:8000/api/tasks/${taskId}/proof`, {
+            const res = await fetch(`/api/tasks/${taskId}/proof`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });

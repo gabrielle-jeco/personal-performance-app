@@ -16,7 +16,7 @@ export default function SupervisorDashboard() {
             const token = localStorage.getItem('auth_token');
             if (!token) return;
 
-            const response = await fetch('http://localhost:8000/api/supervisor/crews', {
+            const response = await fetch('/api/supervisor/crews', {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Accept': 'application/json'

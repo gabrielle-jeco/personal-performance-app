@@ -42,7 +42,7 @@ export default function EvaluationForm({ supervisor, targetDate, onSuccess }: Ev
             // Use passed targetDate
             const dateStr = targetDate.toLocaleDateString('en-CA'); // YYYY-MM-DD
 
-            const res = await fetch('http://localhost:8000/api/evaluations', {
+            const res = await fetch('/api/evaluations', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
