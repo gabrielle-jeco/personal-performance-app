@@ -94,7 +94,7 @@ export default function SupervisorPerformance() {
     const fetchStats = async () => {
         try {
             const token = localStorage.getItem('auth_token');
-            const res = await fetch('http://localhost:8000/api/supervisor/stats', {
+            const res = await fetch('/api/supervisor/stats', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -111,7 +111,7 @@ export default function SupervisorPerformance() {
     const fetchMyTasks = async () => {
         try {
             const token = localStorage.getItem('auth_token');
-            const userRes = await fetch('http://localhost:8000/api/supervisor/crews', {
+            const userRes = await fetch('/api/supervisor/crews', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             let supervisorId = null;
@@ -122,7 +122,7 @@ export default function SupervisorPerformance() {
 
             if (supervisorId) {
                 const dateStr = selectedDate.toLocaleDateString('en-CA');
-                const res = await fetch(`http://localhost:8000/api/supervisor/${supervisorId}/tasks?date=${dateStr}`, {
+                const res = await fetch(`/api/supervisor/${supervisorId}/tasks?date=${dateStr}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (res.ok) {

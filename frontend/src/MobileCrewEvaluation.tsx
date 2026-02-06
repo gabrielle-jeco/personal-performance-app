@@ -48,7 +48,7 @@ export default function MobileCrewEvaluation({ crew, onBack }: MobileCrewEvaluat
         try {
             const token = localStorage.getItem('auth_token');
             const dateStr = selectedDate.toLocaleDateString('en-CA');
-            const res = await fetch(`http://localhost:8000/api/evaluations/check/${crew.id}?date=${dateStr}`, {
+            const res = await fetch(`/api/evaluations/check/${crew.id}?date=${dateStr}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -80,7 +80,7 @@ export default function MobileCrewEvaluation({ crew, onBack }: MobileCrewEvaluat
 
             const dateStr = selectedDate.toLocaleDateString('en-CA');
 
-            const res = await fetch('http://localhost:8000/api/evaluations', {
+            const res = await fetch('/api/evaluations', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,

@@ -26,7 +26,7 @@ const MobileCrewList: React.FC<MobileCrewListProps> = ({ onNavigate }) => {
     const fetchCrews = async () => {
         try {
             const token = localStorage.getItem('auth_token');
-            const res = await fetch('http://localhost:8000/api/supervisor/crews', {
+            const res = await fetch('/api/supervisor/crews', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {

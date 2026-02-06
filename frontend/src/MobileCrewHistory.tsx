@@ -47,7 +47,7 @@ export default function MobileCrewHistory({ crew, onBack }: MobileCrewHistoryPro
         try {
             const token = localStorage.getItem('auth_token');
             const dateStr = selectedDate.toLocaleDateString('en-CA');
-            const res = await fetch(`http://localhost:8000/api/crews/${crew.id}/tasks?date=${dateStr}`, {
+            const res = await fetch(`/api/crews/${crew.id}/tasks?date=${dateStr}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {

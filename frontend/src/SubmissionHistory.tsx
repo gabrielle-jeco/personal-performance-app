@@ -68,7 +68,7 @@ export default function SubmissionHistory({ task, onClose }: SubmissionHistoryPr
                         {task.proof_image ? (
                             <div className="bg-white p-3 rounded-xl border border-gray-100 flex items-center gap-3 hover:shadow-md transition">
                                 <div className="w-12 h-12 bg-gray-100 rounded-lg flex-shrink-0 overflow-hidden">
-                                    <img src={`http://localhost:8000/storage/${task.proof_image}`} alt="Proof" className="w-full h-full object-cover" />
+                                    <img src={`/storage/${task.proof_image}`} alt="Proof" className="w-full h-full object-cover" />
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <p className="text-xs font-medium text-gray-700 truncate">Proof_Submission.jpg</p>

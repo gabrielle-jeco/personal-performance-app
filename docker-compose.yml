@@ -1,0 +1,57 @@
+services:
+  # Laravel Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: perf-app-backend
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./backend:/var/www
+    environment:
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: performance_app
+      DB_USERNAME: sail
+      DB_PASSWORD: password
+    networks:
+      - app-network
+
+  # React Frontend + Nginx Web Server
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: perf-app-frontend
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  # Database
+  db:
+    image: postgres:15
+    container_name: perf-app-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: performance_app
+      POSTGRES_USER: sail
+      POSTGRES_PASSWORD: password
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    ports:
+      - "5432:5432"
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  db-data:

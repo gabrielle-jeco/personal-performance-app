@@ -41,7 +41,7 @@ export default function SupervisorDetail({ supervisor }: SupervisorDetailProps) 
         try {
             const token = localStorage.getItem('auth_token');
             const dateStr = selectedDate.toLocaleDateString('en-CA'); // YYYY-MM-DD
-            const res = await fetch(`http://localhost:8000/api/evaluations/check/${supervisor.id}?date=${dateStr}`, {
+            const res = await fetch(`/api/evaluations/check/${supervisor.id}?date=${dateStr}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -58,7 +58,7 @@ export default function SupervisorDetail({ supervisor }: SupervisorDetailProps) 
             const token = localStorage.getItem('auth_token');
             // Format Date YYYY-MM-DD (Local)
             const dateStr = selectedDate.toLocaleDateString('en-CA'); // YYYY-MM-DD format
-            const res = await fetch(`http://localhost:8000/api/supervisor/${supervisor.id}/tasks?date=${dateStr}`, {
+            const res = await fetch(`/api/supervisor/${supervisor.id}/tasks?date=${dateStr}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -100,7 +100,7 @@ export default function SupervisorDetail({ supervisor }: SupervisorDetailProps) 
     const handleAddTask = async (taskData: any) => {
         try {
             const token = localStorage.getItem('auth_token');
-            const res = await fetch('http://localhost:8000/api/tasks', {
+            const res = await fetch('/api/tasks', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -124,7 +124,7 @@ export default function SupervisorDetail({ supervisor }: SupervisorDetailProps) 
         if (!window.confirm("Delete this task?")) return;
         try {
             const token = localStorage.getItem('auth_token');
-            await fetch(`http://localhost:8000/api/tasks/${taskId}`, {
+            await fetch(`/api/tasks/${taskId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -144,7 +144,7 @@ export default function SupervisorDetail({ supervisor }: SupervisorDetailProps) 
 
         try {
             const token = localStorage.getItem('auth_token');
-            await fetch(`http://localhost:8000/api/tasks/${task.task_id}/status`, {
+            await fetch(`/api/tasks/${task.task_id}/status`, {
                 method: 'PATCH',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -163,7 +163,7 @@ export default function SupervisorDetail({ supervisor }: SupervisorDetailProps) 
 
         try {
             const token = localStorage.getItem('auth_token');
-            const res = await fetch(`http://localhost:8000/api/tasks/${taskId}/proof`, {
+            const res = await fetch(`/api/tasks/${taskId}/proof`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
