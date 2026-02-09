@@ -1,0 +1,7 @@
+# Shell scripts must be LF
+*.sh text eol=lf
+
+# (opsional) Docker-related files also LF
+Dockerfile text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
