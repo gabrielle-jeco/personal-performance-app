@@ -59,6 +59,19 @@ class ManagerSeeder extends Seeder
             'location_id' => null, // RM might not be bound to one store
         ]);
 
+        // RM (Regional Manager) - Demo
+        User::updateOrCreate(
+            ['username' => 'rm_demo'],
+            [
+                'full_name' => 'Regional Manager Demo',
+                'password' => Hash::make('password'),
+                'role_type' => 'manager',
+                'manager_type' => 'RM',
+                'location_id' => null, 
+                'active' => true
+            ]
+        );
+
         $this->command->info('Managers seeded successfully!');
     }
 }
