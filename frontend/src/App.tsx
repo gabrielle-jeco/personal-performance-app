@@ -25,6 +25,8 @@ function App() {
   };
 
   const handleLogout = () => {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('user_data');
     setUser(null);
     setActiveSupervisorPage('employees'); // Reset
   };
