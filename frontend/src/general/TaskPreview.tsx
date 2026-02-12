@@ -5,9 +5,10 @@ interface TaskPreviewProps {
     task: any;
     onClose: () => void;
     onDeleteProof: (taskId: number) => void;
+    readOnly?: boolean;
 }
 
-export default function TaskPreview({ task, onClose, onDeleteProof }: TaskPreviewProps) {
+export default function TaskPreview({ task, onClose, onDeleteProof, readOnly = false }: TaskPreviewProps) {
     if (!task) return null;
 
     return (
@@ -48,13 +49,15 @@ export default function TaskPreview({ task, onClose, onDeleteProof }: TaskPrevie
                             </p>
                         </div>
 
-                        <button
-                            onClick={() => onDeleteProof(task.task_id)}
-                            className="text-red-400 hover:text-red-600 p-1 hover:bg-red-50 rounded-full transition"
-                            title="Delete this image"
-                        >
-                            <Trash2 size={16} />
-                        </button>
+                        {!readOnly && (
+                            <button
+                                onClick={() => onDeleteProof(task.task_id)}
+                                className="text-red-400 hover:text-red-600 p-1 hover:bg-red-50 rounded-full transition"
+                                title="Delete this image"
+                            >
+                                <Trash2 size={16} />
+                            </button>
+                        )}
                     </div>
                 ) : (
                     <div className="text-center text-xs text-gray-400 py-4">

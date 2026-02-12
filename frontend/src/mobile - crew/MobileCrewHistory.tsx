@@ -1,25 +1,65 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown } from 'lucide-react';
-import MobileLayout from './MobileLayout';
+import { ChevronDown, Camera } from 'lucide-react';
+import CrewLayout from './CrewLayout';
 
 interface MobileCrewHistoryProps {
-    crew: any;
+    user: any;
     onBack: () => void;
+    onSelectTask: (task: any) => void;
 }
 
-export default function MobileCrewHistory({ crew, onBack }: MobileCrewHistoryProps) {
+export default function MobileCrewHistory({ user, onBack, onSelectTask }: MobileCrewHistoryProps) {
     const [selectedDate, setSelectedDate] = useState(new Date());
-    const [viewMode, setViewMode] = useState<'ACTIVITY' | 'TASKS'>('ACTIVITY');
+    const [viewMode, setViewMode] = useState<'ACTIVITY' | 'TASKS'>('TASKS'); // Default to TASKS for now
     const [showRoleDropdown, setShowRoleDropdown] = useState(false);
-    const [tasks, setTasks] = useState<any[]>([]); // For Task History
+
+    // Real Data State
+    const [tasks, setTasks] = useState<any[]>([]);
+    const [loading, setLoading] = useState(false);
+
+    // Fetch Tasks
+    useEffect(() => {
+        const fetchTasks = async () => {
+            if (!user?.user_id) return;
+
+            setLoading(true);
+            try {
+                // Format date as YYYY-MM-DD
+                const dateStr = selectedDate.toLocaleDateString('en-CA'); // 'en-CA' is YYYY-MM-DD
+                const response = await fetch(`http://localhost:8000/api/crews/${user.user_id}/tasks?date=${dateStr}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setTasks(data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch tasks", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchTasks();
+    }, [selectedDate, user?.user_id]);
+
+
+    // Mock Activity Log (Placeholder)
+    const [activityLogs] = useState([
+        { time: '08:00', role: 'Crew - Supermarket', action: 'Clock In' },
+        { time: '10:00', role: 'Crew - Cashier', action: 'Break Start' },
+        { time: '15:00', role: 'Crew - Supermarket', action: 'Task Complete' },
+        { time: '16:00', role: 'Crew - Cashier', action: 'Clock Out' },
+    ]);
 
     const today = new Date();
     const currentYear = today.getFullYear();
-    const currentMonth = today.getMonth(); // 0-indexed
+    const currentMonth = today.getMonth();
 
-    const isFutureDate = (date: Date) => {
-        return date > today;
-    };
+    const isFutureDate = (date: Date) => date > today;
 
     const getAvailableMonths = (year: number) => {
         if (year === currentYear) {
@@ -27,41 +67,6 @@ export default function MobileCrewHistory({ crew, onBack }: MobileCrewHistoryPro
         }
         return Array.from({ length: 12 }, (_, i) => i);
     };
-
-    // Mock Activity Logs
-    const [activityLogs] = useState([
-        { time: '08:00', role: 'Crew - Supermarket', action: 'Clock In' },
-        { time: '10:00', role: 'Crew - Cashier', action: 'Break Start' },
-        { time: '15:00', role: 'Crew - Supermarket', action: 'Task Complete' },
-        { time: '16:00', role: 'Crew - Cashier', action: 'Clock Out' },
-        { time: '18:00', role: 'System', action: 'Auto-Report' },
-    ]);
-
-    useEffect(() => {
-        if (viewMode === 'TASKS') {
-            fetchTasks();
-        }
-    }, [selectedDate, viewMode]);
-
-    const fetchTasks = async () => {
-        try {
-            const token = localStorage.getItem('auth_token');
-            const dateStr = selectedDate.toLocaleDateString('en-CA');
-            const res = await fetch(`/api/crews/${crew.id}/tasks?date=${dateStr}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setTasks(data);
-            }
-        } catch (error) {
-            console.error("Failed to fetch crew tasks", error);
-        }
-    };
-
-    // Calendar Logic
-    const getDaysInMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-    const getFirstDayOfMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1).getDay();
 
     const handleMonthChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const newDate = new Date(selectedDate);
@@ -75,15 +80,16 @@ export default function MobileCrewHistory({ crew, onBack }: MobileCrewHistoryPro
         setSelectedDate(newDate);
     };
 
+    const getDaysInMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+    const getFirstDayOfMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+
     const renderCalendar = () => {
         const daysInMonth = getDaysInMonth(selectedDate);
         const firstDay = getFirstDayOfMonth(selectedDate);
         const days = [];
 
-        // Empty slots
         for (let i = 0; i < firstDay; i++) days.push(<div key={`empty-${i}`} className="h-8 md:h-9"></div>);
 
-        // Days
         for (let i = 1; i <= daysInMonth; i++) {
             const date = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), i);
             const isSelected = i === selectedDate.getDate();
@@ -101,10 +107,10 @@ export default function MobileCrewHistory({ crew, onBack }: MobileCrewHistoryPro
                     }}
                     disabled={isFuture}
                     className={`h-8 w-8 md:h-9 md:w-9 rounded-full flex flex-col items-center justify-center text-xs md:text-sm font-medium transition relative ${isSelected
-                            ? 'bg-blue-600 text-white shadow-md'
-                            : isFuture
-                                ? 'text-gray-300 cursor-not-allowed'
-                                : 'text-gray-700 hover:bg-gray-100'
+                        ? 'bg-blue-600 text-white shadow-md'
+                        : isFuture
+                            ? 'text-gray-300 cursor-not-allowed'
+                            : 'text-gray-700 hover:bg-gray-100'
                         }`}
                 >
                     {i}
@@ -115,22 +121,18 @@ export default function MobileCrewHistory({ crew, onBack }: MobileCrewHistoryPro
     };
 
     return (
-        <MobileLayout
-            title={crew.name}
+        <CrewLayout
+            title="History"
+            showBack={true}
             onBack={onBack}
-            allowScroll={false}
+            allowScroll={false} // Use internal scroll for list
         >
             <div className="flex flex-col h-full">
-                {/* Subtitle */}
-                <p className="text-center text-gray-500 text-xs font-medium mb-3 opacity-80 mt-[-10px]">History</p>
-
                 {/* Calendar Card */}
-                <div className="bg-white rounded-3xl shado-sm p-5 mb-4 flex-shrink-0 relative">
-
-                    {/* Month/Year Selection (Desktop Style) */}
+                <div className="bg-white rounded-3xl p-5 mb-4 flex-shrink-0 relative shadow-sm">
+                    {/* Month/Year Selection */}
                     <div className="flex justify-between items-center mb-4 px-1">
                         <div className="flex items-center justify-between w-full gap-2">
-                            {/* Month Select */}
                             <div className="relative group flex-1">
                                 <select
                                     value={selectedDate.getMonth()}
@@ -143,53 +145,46 @@ export default function MobileCrewHistory({ crew, onBack }: MobileCrewHistoryPro
                                         </option>
                                     ))}
                                 </select>
-                                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 group-hover:text-blue-600 transition-colors" />
+                                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400" />
                             </div>
 
-                            {/* Year Select */}
                             <div className="relative group w-24">
                                 <select
                                     value={selectedDate.getFullYear()}
                                     onChange={handleYearChange}
                                     className="w-full appearance-none bg-gray-50 border border-transparent hover:border-blue-100 rounded-xl px-3 py-2 text-gray-700 font-bold text-sm cursor-pointer outline-none transition-colors"
                                 >
-                                    {Array.from({ length: new Date().getFullYear() - 2024 + 1 }, (_, i) => 2024 + i).map(year => (
+                                    {Array.from({ length: currentYear - 2024 + 1 }, (_, i) => 2024 + i).map(year => (
                                         <option key={year} value={year}>{year}</option>
                                     ))}
                                 </select>
-                                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 group-hover:text-blue-600 transition-colors" />
+                                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400" />
                             </div>
                         </div>
                     </div>
 
-                    {/* Day Names */}
                     <div className="grid grid-cols-7 text-center mb-2 border-b border-gray-100 pb-2">
                         {['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'].map(day => (
                             <span key={day} className="text-[10px] font-bold text-gray-400">{day}</span>
                         ))}
                     </div>
 
-                    {/* Days Grid */}
                     <div className="grid grid-cols-7 gap-y-1 justify-items-center">
                         {renderCalendar()}
                     </div>
                 </div>
 
-                {/* List Card - Matches MobileCrewDetail Structure */}
+                {/* List Card */}
                 <div className="bg-white rounded-t-3xl shadow-[0_-5px_20px_rgba(0,0,0,0.03)] flex-1 flex flex-col min-h-0 relative -mx-2 px-4 pt-4">
-
-                    {/* Handle Bar Wrapper */}
                     <div className="flex justify-center mb-2 shrink-0">
                         <div className="w-12 h-1.5 bg-blue-600 rounded-full"></div>
                     </div>
 
-                    {/* List Header & Dropdown */}
                     <div className="flex justify-between items-center mb-4 sticky top-0 bg-white py-1 z-10 w-full shrink-0">
                         <h3 className="font-bold text-gray-800 text-sm">
                             {selectedDate.toLocaleDateString('en-US', { day: 'numeric', month: 'long' })}
                         </h3>
 
-                        {/* Role Dropdown */}
                         <div className="relative">
                             <button
                                 onClick={() => setShowRoleDropdown(!showRoleDropdown)}
@@ -199,7 +194,6 @@ export default function MobileCrewHistory({ crew, onBack }: MobileCrewHistoryPro
                                 <ChevronDown size={14} className={`transition ${showRoleDropdown ? 'rotate-180' : ''}`} />
                             </button>
 
-                            {/* Dropdown Menu */}
                             {showRoleDropdown && (
                                 <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl z-20 overflow-hidden border border-gray-100 animate-slide-in">
                                     <button
@@ -221,11 +215,8 @@ export default function MobileCrewHistory({ crew, onBack }: MobileCrewHistoryPro
                         </div>
                     </div>
 
-
-                    {/* Scrollable Content List */}
                     <div className="overflow-y-auto flex-1 pb-20 -mx-2 px-2 space-y-3">
                         {viewMode === 'ACTIVITY' ? (
-                            // Activity Logs
                             activityLogs.map((log, idx) => (
                                 <div key={idx} className="bg-gray-100/50 rounded-2xl p-4 flex items-center justify-between border border-transparent hover:border-gray-200 transition">
                                     <div className="flex flex-col gap-0.5">
@@ -235,19 +226,34 @@ export default function MobileCrewHistory({ crew, onBack }: MobileCrewHistoryPro
                                     <span className="text-gray-500 text-xs font-semibold bg-white px-2 py-1 rounded-lg shadow-sm border border-gray-100">{log.time}</span>
                                 </div>
                             ))
+                        ) : loading ? (
+                            <div className="flex justify-center py-10 text-gray-400">Loading tasks...</div>
                         ) : (
-                            // Task History
                             tasks.length > 0 ? (
                                 tasks.map((task) => (
-                                    <div key={task.task_id} className="bg-gray-100/50 rounded-2xl p-4 flex items-center gap-3 border border-transparent hover:border-gray-200 transition">
-                                        <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 ${task.status === 'approved' ? 'bg-blue-100 border-blue-500 text-blue-600' : 'border-gray-300 bg-white'
-                                            }`}>
-                                            {task.status === 'approved' && <div className="w-2.5 h-2.5 rounded-full bg-blue-500"></div>}
+                                    <div
+                                        key={task.task_id}
+                                        className="bg-gray-100/50 rounded-2xl p-4 flex items-center justify-between gap-3 border border-transparent hover:border-gray-200 transition"
+                                    >
+                                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                                            <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 ${task.status === 'approved' ? 'bg-blue-100 border-blue-500 text-blue-600' :
+                                                task.status === 'completed' || task.status === 'submitted' ? 'bg-green-100 border-green-500 text-green-600' :
+                                                    'border-gray-300 bg-white'
+                                                }`}>
+                                                {(task.status === 'approved' || task.status === 'completed' || task.status === 'submitted') && <div className={`w-2.5 h-2.5 rounded-full ${task.status === 'approved' ? 'bg-blue-500' : 'bg-green-500'}`}></div>}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="font-bold text-gray-800 text-sm line-clamp-1 mb-0.5">{task.title}</p>
+                                                <p className="text-[10px] text-gray-400">{new Date(task.due_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                            </div>
                                         </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="font-bold text-gray-800 text-sm line-clamp-1 mb-0.5">{task.title}</p>
-                                            <p className="text-[10px] text-gray-400">{new Date(task.due_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                                        </div>
+                                        <button
+                                            onClick={() => onSelectTask(task)}
+                                            className="bg-blue-600 text-white shadow-blue-200 text-[10px] font-bold py-2 px-4 rounded-xl shadow-md active:scale-95 transition-transform flex items-center gap-1"
+                                        >
+                                            <Camera size={14} />
+                                            Foto
+                                        </button>
                                     </div>
                                 ))
                             ) : (
@@ -256,12 +262,10 @@ export default function MobileCrewHistory({ crew, onBack }: MobileCrewHistoryPro
                                 </div>
                             )
                         )}
-                        {/* Safe Area Padding */}
                         <div className="h-4"></div>
                     </div>
-
                 </div>
             </div>
-        </MobileLayout >
+        </CrewLayout>
     );
 }

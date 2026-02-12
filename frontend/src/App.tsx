@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import LoginPage from './LoginPage';
-import ManagerLayout from './ManagerLayout';
-import ManagerDashboard from './ManagerDashboard';
-import SupervisorLayout from './SupervisorLayout';
-import SupervisorDashboard from './SupervisorDashboard';
-import SupervisorMobileApp from './SupervisorMobileApp';
-import SupervisorPerformance from './SupervisorPerformance';
+import LoginPage from './general/LoginPage';
+import ManagerLayout from './desktop - manager/ManagerLayout';
+import ManagerDashboard from './desktop - manager/ManagerDashboard';
+import SupervisorLayout from './desktop - supervisor/SupervisorLayout';
+import SupervisorDashboard from './desktop - supervisor/SupervisorDashboard';
+import SupervisorMobileApp from './mobile - supervisor/SupervisorMobileApp';
+import SupervisorPerformance from './desktop - supervisor/SupervisorPerformance';
+import CrewMobileApp from './mobile - crew/CrewMobileApp';
 
 function App() {
   const [user, setUser] = useState<any>(null);
@@ -69,6 +70,12 @@ function App() {
         )}
       </SupervisorLayout>
     );
+  }
+
+  // Crew Flow
+  // Crew Flow
+  if (user.role_type === 'crew' || user.role_type === 'employee') {
+    return <CrewMobileApp user={user} onLogout={handleLogout} />;
   }
 
   return <div>Role not supported yet.</div>;

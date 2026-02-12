@@ -148,6 +148,7 @@ const MobileCrewDetail: React.FC<MobileCrewDetailProps> = ({ crew, onNavigate })
                 onClose={() => setIsPreviewOpen(false)}
                 task={previewTask}
                 onDeleteProof={handleDeleteProof}
+                readOnly={previewTask?.status === 'approved' || (previewTask && new Date(previewTask.due_at) < new Date(new Date().setHours(0, 0, 0, 0)))}
             />
 
             {/* CARD 1: Profile & History (Static) */}
@@ -171,8 +172,8 @@ const MobileCrewDetail: React.FC<MobileCrewDetailProps> = ({ crew, onNavigate })
                 </div>
             </div>
 
-            {/* CARD 2: Task Filter & Progress (Static) */}
-            <div className="bg-white rounded-3xl p-5 shadow-sm mb-4 shrink-0">
+            {/* CARD 2: Task Filter & Progress */}
+            <div className="bg-white rounded-3xl p-5 shadow-sm mb-4 shrink-0 border border-gray-100">
                 {/* Dropdown / Filter Header */}
                 <h4 className="font-bold text-gray-800 text-sm mb-3">Task</h4>
                 <div className="relative mb-3 h-12">
@@ -191,17 +192,20 @@ const MobileCrewDetail: React.FC<MobileCrewDetailProps> = ({ crew, onNavigate })
                     </button>
                 </div>
 
-                {/* Progress Bar */}
+                {/* Progress Bar (Matched to Crew) */}
                 <div>
-                    <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
+                    <div className="flex justify-between items-center mb-2">
+                        <p className="text-sm font-bold text-gray-600">
+                            Task Completed <span className="text-gray-900">{completedCount}/{totalCount}</span>
+                        </p>
+                        <span className="text-sm font-bold text-blue-600">{Math.round(progress)}%</span>
+                    </div>
+                    <div className="w-full bg-gray-100 rounded-full h-3">
                         <div
-                            className="bg-blue-300 h-3 rounded-full transition-all duration-500"
+                            className="bg-blue-600 h-3 rounded-full transition-all duration-500"
                             style={{ width: `${progress}%` }}
                         ></div>
                     </div>
-                    <p className="text-xs text-gray-500 pl-1">
-                        Task Completed {completedCount}/{totalCount}
-                    </p>
                 </div>
             </div>
 
@@ -214,52 +218,61 @@ const MobileCrewDetail: React.FC<MobileCrewDetailProps> = ({ crew, onNavigate })
                 </div>
 
                 {/* Scrollable List Container */}
-                <div className="overflow-y-auto flex-1 px-3 pb-20 space-y-4">
+                <div className="overflow-y-auto flex-1 px-3 pb-20 space-y-3">
                     {tasks.length === 0 && (
                         <div className="text-center py-10 text-gray-400 text-sm">
                             No tasks for this date.
                         </div>
                     )}
 
-                    {tasks.map(task => (
-                        <div key={task.task_id} className="bg-gray-100/50 rounded-2xl p-4 flex items-center justify-between group border border-transparent hover:border-gray-200 transition">
-                            <div className="flex items-start gap-3 flex-1">
-                                <div
-                                    onClick={() => handleToggleStatus(task)}
-                                    className={`w-5 h-5 rounded border-2 mt-1 flex items-center justify-center transition-colors flex-shrink-0 cursor-pointer
-                                    ${task.status === 'approved'
-                                            ? 'bg-blue-100 border-blue-500 text-blue-600'
-                                            : 'border-gray-400 bg-white hover:border-blue-500'}`}
-                                >
-                                    {task.status === 'approved' && <Check size={14} strokeWidth={3} />}
-                                </div>
-                                <div className="flex-1 min-w-0 pr-2">
-                                    <p className="text-sm font-medium text-gray-700 leading-tight mb-1">{task.title}</p>
-                                    <p className="text-[10px] text-gray-400 mb-0.5">Due {new Date(task.due_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                                    {task.note && <div className="text-[10px] text-gray-500 italic truncate">{task.note}</div>}
-                                </div>
-                            </div>
+                    {tasks.map(task => {
+                        const isApproved = task.status === 'approved';
+                        const isPastDue = new Date(task.due_at) < new Date(new Date().setHours(0, 0, 0, 0));
+                        const isReadOnly = isApproved || isPastDue;
 
-                            <div className="flex flex-col gap-2">
-                                <button
-                                    onClick={() => handleViewPhoto(task)}
-                                    className={`text-[10px] font-bold py-2 px-4 rounded-xl shadow-md active:scale-95 transition-transform flex items-center gap-1 ${task.proof_image
-                                        ? 'bg-blue-600 text-white shadow-blue-200'
-                                        : 'bg-gray-200 text-gray-500'
-                                        }`}
-                                >
-                                    <Camera size={14} />
-                                    Foto
-                                </button>
-                                <button
-                                    onClick={() => handleDeleteTask(task.task_id)}
-                                    className="text-red-300 hover:text-red-500 p-1 self-end transition"
-                                >
-                                    <Trash2 size={16} />
-                                </button>
+                        return (
+                            <div key={task.task_id} className="bg-gray-100/50 rounded-2xl p-4 flex items-center justify-between group border border-transparent hover:border-gray-200 transition">
+                                <div className="flex items-start gap-3 flex-1">
+                                    {/* Status Checkbox */}
+                                    <div
+                                        onClick={() => !isPastDue && handleToggleStatus(task)}
+                                        className={`w-5 h-5 rounded border-2 mt-1 flex items-center justify-center transition-colors flex-shrink-0 cursor-pointer
+                                        ${isApproved
+                                                ? 'bg-blue-100 border-blue-500 text-blue-600'
+                                                : isPastDue ? 'border-gray-300 bg-gray-50 cursor-not-allowed' : 'border-gray-300 bg-white hover:border-blue-500'}`}
+                                    >
+                                        {isApproved && <Check size={14} strokeWidth={3} />}
+                                    </div>
+
+                                    <div className="flex-1 min-w-0 pr-2">
+                                        <p className={`text-sm font-medium leading-tight mb-1 ${isApproved ? 'text-gray-500' : 'text-gray-700'}`}>
+                                            {task.title}
+                                        </p>
+                                        <p className="text-[10px] text-gray-400 mb-0.5">Due {new Date(task.due_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                        {task.note && <div className="text-[10px] text-gray-500 italic truncate">{task.note}</div>}
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-col gap-2 items-end">
+                                    <button
+                                        onClick={() => handleViewPhoto(task)}
+                                        className="bg-blue-600 text-white shadow-blue-200 text-[10px] font-bold py-2 px-4 rounded-xl shadow-md active:scale-95 transition-transform flex items-center gap-1"
+                                    >
+                                        <Camera size={14} />
+                                        Foto
+                                    </button>
+                                    {!isPastDue && (
+                                        <button
+                                            onClick={() => handleDeleteTask(task.task_id)}
+                                            className="text-red-300 hover:text-red-500 p-1 transition"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
 
                     {/* Padding Bottom for safe scrolling */}
                     <div className="h-10"></div>
