@@ -30,10 +30,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/tasks/{id}', [App\Http\Controllers\TaskController::class, 'destroy']);
     Route::patch('/tasks/{id}/status', [App\Http\Controllers\TaskController::class, 'updateStatus']);
     Route::delete('/tasks/{id}/proof', [App\Http\Controllers\TaskController::class, 'removeProof']);
+    Route::delete('/tasks/{id}/evidence', [App\Http\Controllers\TaskController::class, 'removeEvidence']);
 
-    // Evaluation Routes
-    Route::post('/evaluations', [App\Http\Controllers\EvaluationController::class, 'store']);
-    Route::get('/evaluations/check/{supervisorId}', [App\Http\Controllers\EvaluationController::class, 'checkPeriod']);
+    Route::post('/tasks/{id}/evidence', [App\Http\Controllers\TaskController::class, 'uploadEvidence']);
+
     // Evaluation Routes
     Route::post('/evaluations', [App\Http\Controllers\EvaluationController::class, 'store']);
     Route::get('/evaluations/check/{supervisorId}', [App\Http\Controllers\EvaluationController::class, 'checkPeriod']);

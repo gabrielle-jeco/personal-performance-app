@@ -18,7 +18,9 @@ class Task extends Model
         'note',
         'due_at',
         'status',
-        'proof_image'
+        'proof_image',
+        'before_image',
+        'after_image'
     ];
 
     protected $casts = [

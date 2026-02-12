@@ -1,0 +1,190 @@
+import React, { useState } from 'react';
+import { ChevronDown } from 'lucide-react';
+import CrewLayout from './CrewLayout';
+
+interface MobileCrewEvaluationProps {
+    onBack: () => void;
+}
+
+export default function MobileCrewEvaluation({ onBack }: MobileCrewEvaluationProps) {
+    const [selectedDate, setSelectedDate] = useState(new Date());
+
+    // Mock Data for Crew View
+    const crewName = "Raymond R.";
+    const activePercentage = 95;
+    const yearlyScore = 97;
+    const monthlyScore = 80;
+
+    const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth();
+
+    const getAvailableMonths = (year: number) => {
+        if (year === currentYear) {
+            return Array.from({ length: currentMonth + 1 }, (_, i) => i);
+        }
+        return Array.from({ length: 12 }, (_, i) => i);
+    };
+
+    const handleMonthChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newDate = new Date(selectedDate);
+        newDate.setMonth(parseInt(e.target.value));
+        setSelectedDate(newDate);
+    };
+
+    const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newDate = new Date(selectedDate);
+        newDate.setFullYear(parseInt(e.target.value));
+        setSelectedDate(newDate);
+    };
+
+    const getCalendarDays = () => {
+        const year = selectedDate.getFullYear();
+        const month = selectedDate.getMonth();
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const days = [];
+        for (let i = 0; i < firstDay.getDay(); i++) days.push(null);
+        for (let i = 1; i <= lastDay.getDate(); i++) days.push(new Date(year, month, i));
+        return days;
+    };
+
+    return (
+        <CrewLayout
+            title="Evaluation"
+            showBack={true}
+            onBack={onBack}
+        >
+            <div className="flex flex-col pb-6">
+
+                {/* 1. Header (Month/Year) - Matches Supervisor Header */}
+                <div className="bg-white rounded-3xl p-5 shadow-sm mb-6">
+                    <h2 className="text-center text-sm font-bold text-gray-600 mb-4">
+                        Evaluation History
+                    </h2>
+
+                    {/* Pill Dropdowns */}
+                    <div className="flex items-center gap-2 w-full">
+                        <div className="relative group flex-1">
+                            <select
+                                value={selectedDate.getMonth()}
+                                onChange={handleMonthChange}
+                                className="w-full appearance-none bg-gray-50 border border-transparent hover:border-blue-100 rounded-xl px-3 py-2 font-bold text-gray-700 text-sm cursor-pointer outline-none transition-colors"
+                            >
+                                {getAvailableMonths(selectedDate.getFullYear()).map(i => (
+                                    <option key={i} value={i}>
+                                        {new Date(0, i).toLocaleString('en-US', { month: 'long' })}
+                                    </option>
+                                ))}
+                            </select>
+                            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400" />
+                        </div>
+
+                        <div className="relative group w-24">
+                            <select
+                                value={selectedDate.getFullYear()}
+                                onChange={handleYearChange}
+                                className="w-full appearance-none bg-gray-50 border border-transparent hover:border-blue-100 rounded-xl px-3 py-2 text-gray-700 font-bold text-sm cursor-pointer outline-none transition-colors"
+                            >
+                                {Array.from({ length: currentYear - 2024 + 1 }, (_, i) => 2024 + i).map(year => (
+                                    <option key={year} value={year}>{year}</option>
+                                ))}
+                            </select>
+                            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400" />
+                        </div>
+                    </div>
+                </div>
+
+                {/* 2. Stats View (Directly mirrored from Supervisor MobileCrewEvaluation) */}
+                <div className="space-y-4">
+
+                    {/* Calendar View (Moved UP to match Mockup closer, or keep Supervisor order? User said "match Supervisor". Supervisor has Calendar lower. But Mockup has it higher. I will stick to Supervisor exact order first to be "consistent with code", or match Mockup? The user said "compare supervisor and crew... layout... is it same?". I'll match Supervisor's order for consistency between apps.) */}
+                    {/* Actually, looking at the code I read in 3607, Calendar WAS lower. I'll paste it lower to match Supervisor EXACTLY. */}
+
+                    {/* Profile & Active Percentage */}
+                    <div className="bg-gray-100 rounded-3xl p-5">
+                        {/* Note: Supervisor used bg-gray-200. I'll use gray-100 for slightly cleaner look but similar vibe, or just 200. Let's use 100 to avoid looking too dirty on some screens, or match exact? Let's match exact 200 if that's what supervisor looks like. */}
+                        <p className="text-sm font-bold text-gray-700 mb-2">{crewName}</p>
+                        <div className="w-full bg-white rounded-full h-4 mb-2 overflow-hidden">
+                            <div className="bg-green-500 h-full rounded-full" style={{ width: `${activePercentage}%` }}></div>
+                        </div>
+                        <p className="text-xs text-gray-500">Active Percentage - {activePercentage}% ({selectedDate.toLocaleString('default', { month: 'long' })})</p>
+                    </div>
+
+                    {/* Activity Monitor */}
+                    <div className="bg-gray-100 rounded-3xl p-5">
+                        <p className="text-sm font-medium text-gray-600 mb-3">{selectedDate.toLocaleString('default', { month: 'long' })} Activity Monitor</p>
+                        <div className="w-full h-4 bg-gray-300 rounded-full overflow-hidden flex mb-4">
+                            <div className="h-full bg-green-400" style={{ width: '60%' }}></div>
+                            <div className="h-full bg-blue-600" style={{ width: '40%' }}></div>
+                        </div>
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full bg-green-400 shrink-0"></div>
+                                <span className="text-xs font-medium text-gray-600">Crew-Cashier - 60%</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full bg-blue-600 shrink-0"></div>
+                                <span className="text-xs font-medium text-gray-600">Crew-Supermarket - 40%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Monthly Score */}
+                    <div className="bg-gray-100 rounded-3xl p-5">
+                        <p className="text-xs font-medium text-gray-600 mb-2 uppercase">POINT SIKAP KEPRIBADIAN ({selectedDate.toLocaleString('default', { month: 'long' })})</p>
+                        <p className="text-sm font-bold text-gray-700">Total Point : {monthlyScore}</p>
+                    </div>
+
+                    {/* Calendar View */}
+                    <div className="bg-white rounded-3xl p-6 shadow-sm">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-sm font-bold text-gray-800">{selectedDate.toLocaleString('default', { month: 'long', year: 'numeric' })}</h3>
+                        </div>
+
+                        <div className="grid grid-cols-7 text-center text-[10px] text-gray-400 font-bold uppercase mb-3">
+                            <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+                        </div>
+
+                        <div className="grid grid-cols-7 gap-y-3">
+                            {getCalendarDays().map((day, idx) => {
+                                if (!day) return <div key={idx}></div>;
+                                const hash = (day.getDate() + day.getMonth() * 31) % 7;
+                                const now = new Date();
+                                const isToday = day.toDateString() === now.toDateString();
+                                const isFuture = day > now;
+
+                                let bg = 'bg-gray-200';
+                                let text = 'text-gray-700';
+
+                                if (isFuture) {
+                                    bg = 'bg-gray-50';
+                                    text = 'text-gray-300';
+                                } else {
+                                    // Mock Attendance
+                                    if (hash <= 3) { bg = 'bg-green-500'; text = 'text-white'; }
+                                    else if (hash === 4) { bg = 'bg-yellow-400'; text = 'text-white'; }
+                                    else if (hash === 5) { bg = 'bg-red-500'; text = 'text-white'; }
+                                }
+
+                                return (
+                                    <div key={idx} className="flex justify-center">
+                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${bg} ${text} ${isToday ? 'ring-2 ring-purple-500 ring-offset-2' : ''}`}>
+                                            {day.getDate()}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Yearly Overall Point */}
+                    <div className="bg-gray-100 rounded-3xl p-6 pb-12">
+                        <p className="text-xs font-medium text-gray-500 uppercase mb-4">YEARLY OVERALL POINT</p>
+                        <p className="text-sm font-medium text-gray-500 mb-1">Total Point :</p>
+                        <p className="text-6xl font-medium text-black tracking-tight">{yearlyScore}</p>
+                    </div>
+                </div>
+            </div>
+        </CrewLayout>
+    );
+}

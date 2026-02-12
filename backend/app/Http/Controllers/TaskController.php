@@ -100,4 +100,69 @@ class TaskController extends Controller
 
         return response()->json(['message' => 'Proof removed', 'task' => $task]);
     }
+    /**
+     * Upload evidence (Before/After photos) for a task.
+     * Route: POST /api/tasks/{id}/evidence
+     */
+    public function uploadEvidence(Request $request, $id)
+    {
+        $request->validate([
+            'before' => 'nullable|image|max:10240', // Max 10MB
+            'after' => 'nullable|image|max:10240',
+        ]);
+
+        $task = Task::findOrFail($id);
+
+        // Security check: Ensure the authenticated user is the one assigned to the task
+        if ($task->user_id !== Auth::id()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        if ($request->hasFile('before')) {
+            $path = $request->file('before')->store('tasks', 'public');
+            $task->before_image = $path;
+        }
+
+        if ($request->hasFile('after')) {
+            $path = $request->file('after')->store('tasks', 'public');
+            $task->after_image = $path;
+        }
+
+        // If both images are present (or logically "work is done"), update status
+        if ($task->before_image && $task->after_image) {
+            $task->status = 'submitted';
+        }
+
+        $task->save();
+
+        return response()->json($task);
+    }
+    /**
+     * Remove evidence image (before/after) from a task.
+     * Route: DELETE /api/tasks/{id}/evidence
+     */
+    public function removeEvidence(Request $request, $id)
+    {
+        $request->validate([
+            'type' => 'required|in:before,after'
+        ]);
+
+        $task = Task::findOrFail($id);
+        $type = $request->input('type');
+
+        // Security check
+        if ($task->user_id !== Auth::id()) {
+            // return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        if ($type === 'before') {
+            $task->before_image = null;
+        } elseif ($type === 'after') {
+            $task->after_image = null;
+        }
+
+        $task->save();
+
+        return response()->json(['message' => 'Evidence removed', 'task' => $task]);
+    }
 }
