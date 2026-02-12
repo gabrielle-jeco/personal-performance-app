@@ -32,12 +32,14 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({ children, title = "Dashboar
     }, []);
 
     return (
-        // Root App Shell: Fixed, No Window Scroll, Dual-Color Background
-        <div className="fixed inset-0 font-sans text-gray-800 overflow-hidden bg-[linear-gradient(to_bottom,#2563EB_30%,#F9FAFB_30%)]">
+        // Root App Shell: Fixed, No Window Scroll, Dual-Color Background (Blue Header, White Body)
+        <div className="fixed inset-0 font-sans text-gray-800 overflow-hidden bg-gray-50">
+            {/* Blue Background Top Half */}
+            <div className="absolute top-0 left-0 right-0 h-1/3 bg-blue-600 z-0"></div>
 
             {/* Header: Dynamic Sticky (Z-30) */}
             <header
-                className={`absolute top-0 left-0 right-0 bg-blue-600 text-white flex flex-col justify-end z-30 transition-all duration-300 ease-in-out ${isScrolled ? 'h-16 px-6 pb-4 shadow-md' : 'h-28 px-6 pb-6 shadow-none'
+                className={`absolute top-0 left-0 right-0 text-white flex flex-col justify-end z-30 transition-all duration-300 ease-in-out ${isScrolled ? 'h-16 px-6 pb-4 bg-blue-600 shadow-md' : 'h-24 px-6 pb-6 bg-transparent'
                     }`}
             >
                 <div className="relative flex items-center justify-center w-full">
@@ -62,14 +64,11 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({ children, title = "Dashboar
                 className={`absolute inset-0 z-10 overflow-x-hidden ${allowScroll ? 'overflow-y-auto overscroll-none' : 'overflow-y-hidden'}`}
             >
                 {/* Spacer - Remains constant to push content down initially */}
-                <div className="h-28 w-full shrink-0"></div>
+                <div className="h-24 w-full shrink-0"></div>
 
                 {/* Main Content */}
                 {/* if !allowScroll: Fill remaining height exactly and flex-col for children to manage scroll */}
-                <main className={`bg-gray-50 rounded-t-[30px] w-full px-6 py-8 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] ${allowScroll
-                    ? 'min-h-screen'
-                    : 'h-[calc(100vh-7rem)] flex flex-col'
-                    }`}>
+                <main className={`bg-gray-50 rounded-t-[30px] min-h-[calc(100vh-6rem)] w-full px-6 py-6 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] relative z-20`}>
                     {children}
 
                     {/* Bottom Padding only needed for scrollable main */}

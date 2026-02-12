@@ -1,11 +1,12 @@
-import React from 'react';
-import { LogOut, ChevronDown, CheckSquare, FileText, BarChart2, Users } from 'lucide-react';
+import React, { useState } from 'react';
+import { LogOut, ChevronDown, CheckSquare, FileText, BarChart2, Users, MapPin, Star } from 'lucide-react';
 import MobileLayout from './MobileLayout';
 
 // Mock Data
 const SUPERVISOR_NAME = "Raymond Rochville!";
 const LOCATION_NAME = "YOGYA CIAMIS (CMS)";
 const PROGRESS_PERCENTAGE = 65;
+const YEARLY_SCORE = 98; // Mock Score for Supervisor
 
 interface DashboardProps {
     onNavigate: (view: any) => void;
@@ -21,26 +22,46 @@ const SupervisorDashboardMobile: React.FC<DashboardProps> = ({ onNavigate }) => 
         window.location.reload();
     };
 
+    const getScoreColor = (score: number) => {
+        if (score > 90) return 'text-green-500';
+        if (score > 75) return 'text-yellow-400';
+        return 'text-red-500';
+    };
+
     return (
         <MobileLayout title="Dashboard" allowScroll={false}>
-            {/* 1. Welcome Card */}
-            <div className="bg-white rounded-3xl p-5 shadow-sm mb-4 relative overflow-hidden flex items-center justify-between">
-                <div>
-                    <p className="text-xs text-gray-400">Welcome, Supervisor Fashion</p>
-                    <h2 className="text-lg font-bold text-gray-800">{SUPERVISOR_NAME}</h2>
+            {/* 1. Identity Card (Crew Style) */}
+            <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 relative overflow-hidden mb-6">
+                <div className="flex justify-between items-start mb-4">
+                    <div className="flex items-center gap-4">
+                        <div className="w-14 h-14 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 text-xl font-bold">
+                            {SUPERVISOR_NAME.charAt(0)}
+                        </div>
+                        <div>
+                            <p className="text-xs text-gray-400">Welcome,</p>
+                            <h2 className="text-lg font-bold text-gray-800 leading-tight">
+                                {SUPERVISOR_NAME}
+                            </h2>
+                        </div>
+                    </div>
+                    {/* Star Rating */}
+                    <div className={`flex flex-col items-center ${getScoreColor(YEARLY_SCORE)}`}>
+                        <Star fill="currentColor" size={24} />
+                        <span className="text-xs font-bold mt-1">{YEARLY_SCORE}</span>
+                    </div>
                 </div>
-                <button onClick={handleLogout} className="text-red-500 hover:bg-red-50 p-2 rounded-full transition">
-                    <LogOut size={20} />
-                </button>
+
+                {/* Location (Locked) */}
+                <div className="bg-gray-100 rounded-xl p-3 flex items-center gap-3 text-gray-500">
+                    <MapPin size={18} />
+                    <span className="text-sm font-semibold uppercase tracking-wide">
+                        {LOCATION_NAME}
+                    </span>
+                    <div className="ml-auto bg-gray-200 px-2 py-0.5 rounded text-[10px] font-bold">LOCKED</div>
+                </div>
             </div>
 
-            {/* 2. Location Dropdown (Mock) */}
-            <div className="bg-gray-200 rounded-xl p-3 mb-4 flex justify-between items-center px-4">
-                <span className="font-bold text-gray-700 text-sm">{LOCATION_NAME}</span>
-                <ChevronDown size={16} className="text-blue-600" />
-            </div>
-
-            {/* 3. Average Task Progress */}
+            {/* 2. Average Task Progress */}
             <div className="mb-8 mt-2">
                 <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
                     <div
@@ -53,7 +74,7 @@ const SupervisorDashboardMobile: React.FC<DashboardProps> = ({ onNavigate }) => 
                 </p>
             </div>
 
-            {/* 5. Menu Grid */}
+            {/* 3. Menu Grid */}
             <div className="grid grid-cols-2 gap-4">
                 <MenuCard
                     icon={<CheckSquare size={32} className="text-blue-600" />}
@@ -76,6 +97,15 @@ const SupervisorDashboardMobile: React.FC<DashboardProps> = ({ onNavigate }) => 
                     onClick={() => onNavigate('EMPLOYEE_LIST')}
                 />
             </div>
+
+            {/* 4. Logout Button (Bottom) */}
+            <button
+                onClick={handleLogout}
+                className="w-full bg-red-50 p-4 rounded-2xl shadow-sm border border-red-100 flex items-center justify-center gap-2 hover:bg-red-100 transition mt-6 group mb-24"
+            >
+                <LogOut size={20} className="text-red-500 group-hover:scale-110 transition-transform" />
+                <span className="font-bold text-red-600">Log Out</span>
+            </button>
         </MobileLayout>
     );
 };

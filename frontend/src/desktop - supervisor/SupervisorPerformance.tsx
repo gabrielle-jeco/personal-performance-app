@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { BarChart2, CheckSquare, Camera, Check, ChevronDown, Clock } from 'lucide-react';
-import TaskPreview from './TaskPreview'; // Ensure this uses default import
+import TaskPreview from '../general/TaskPreview'; // Ensure this uses default import
 
 export default function SupervisorPerformance() {
     const [activeTab, setActiveTab] = useState<'STATS' | 'CHECKLIST'>('STATS');
