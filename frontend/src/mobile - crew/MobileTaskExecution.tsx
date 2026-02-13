@@ -21,8 +21,8 @@ export default function MobileTaskExecution({ task, onClose, onUpload }: MobileT
     const [showEvidenceList, setShowEvidenceList] = useState(isReadOnly); // Acts as "List Mode" (Init with ReadOnly)
 
     // Upload State (Preview only, real data comes from task or fresh upload)
-    const [beforePreview, setBeforePreview] = useState<string | null>(task.before_image ? (task.before_image.startsWith('http') ? task.before_image : `http://localhost:8000/storage/${task.before_image}`) : null);
-    const [afterPreview, setAfterPreview] = useState<string | null>(task.after_image ? (task.after_image.startsWith('http') ? task.after_image : `http://localhost:8000/storage/${task.after_image}`) : null);
+    const [beforePreview, setBeforePreview] = useState<string | null>(task.before_image ? (task.before_image.startsWith('http') ? task.before_image : `/storage/${task.before_image}`) : null);
+    const [afterPreview, setAfterPreview] = useState<string | null>(task.after_image ? (task.after_image.startsWith('http') ? task.after_image : `/storage/${task.after_image}`) : null);
 
     // Loading State
     const [isUploading, setIsUploading] = useState(false);
@@ -173,8 +173,8 @@ export default function MobileTaskExecution({ task, onClose, onUpload }: MobileT
                 onClose={handleClose}
                 task={{
                     ...task,
-                    before_image: beforePreview?.replace('http://localhost:8000/storage/', '') || 'https://images.unsplash.com/photo-1550537687-c91072c4792d?q=80&w=1000&auto=format&fit=crop',
-                    after_image: afterPreview?.replace('http://localhost:8000/storage/', '') || 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=1000&auto=format&fit=crop'
+                    before_image: (beforePreview || '').replace('/storage/', '') || 'https://images.unsplash.com/photo-1550537687-c91072c4792d?q=80&w=1000&auto=format&fit=crop',
+                    after_image: (afterPreview || '').replace('/storage/', '') || 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=1000&auto=format&fit=crop'
                 }}
                 onSelectImage={(type) => {
                     if (type === 'proof') return;

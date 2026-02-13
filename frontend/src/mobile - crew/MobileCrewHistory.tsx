@@ -26,7 +26,7 @@ export default function MobileCrewHistory({ user, onBack, onSelectTask }: Mobile
             try {
                 // Format date as YYYY-MM-DD
                 const dateStr = selectedDate.toLocaleDateString('en-CA'); // 'en-CA' is YYYY-MM-DD
-                const response = await fetch(`http://localhost:8000/api/crews/${user.user_id}/tasks?date=${dateStr}`, {
+                const response = await fetch(`/api/crews/${user.user_id}/tasks?date=${dateStr}`, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
                     }

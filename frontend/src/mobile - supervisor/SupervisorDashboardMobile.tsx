@@ -84,7 +84,7 @@ const SupervisorDashboardMobile: React.FC<DashboardProps> = ({ onNavigate }) => 
                 <MenuCard
                     icon={<FileText size={32} className="text-blue-600" />}
                     label="Follow Up"
-                    onClick={() => console.log('Follow Up clicked')}
+                    onClick={() => { }}
                 />
                 <MenuCard
                     icon={<BarChart2 size={32} className="text-blue-600" />}

@@ -36,7 +36,7 @@ export default function CrewMobileApp({ user, onLogout }: CrewMobileAppProps) {
 
         try {
             // Call API
-            const response = await fetch(`http://localhost:8000/api/tasks/${selectedTask.task_id}/evidence`, {
+            const response = await fetch(`/api/tasks/${selectedTask.task_id}/evidence`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('auth_token')}`

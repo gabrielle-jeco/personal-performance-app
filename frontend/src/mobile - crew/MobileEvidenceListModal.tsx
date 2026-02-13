@@ -38,7 +38,7 @@ export default function MobileEvidenceListModal({
         if (!imageUrl) return null;
 
         // Ensure full URL
-        const fullUrl = imageUrl.startsWith('http') ? imageUrl : `http://localhost:8000/storage/${imageUrl}`;
+        const fullUrl = imageUrl.startsWith('http') ? imageUrl : `/storage/${imageUrl}`;
 
         return (
             <div
