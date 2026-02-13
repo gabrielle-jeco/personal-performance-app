@@ -24,10 +24,14 @@ class TaskController extends Controller
         $query = Task::where('user_id', $supervisorId);
 
         if ($request->has('date')) {
+            \Illuminate\Support\Facades\Log::info("Fetch Tasks for ID: $supervisorId on Date: " . $request->date);
             $query->whereDate('due_at', $request->date);
+        } else {
+            \Illuminate\Support\Facades\Log::info("Fetch Tasks for ID: $supervisorId (No Date)");
         }
 
         $tasks = $query->orderBy('due_at', 'asc')->get();
+        \Illuminate\Support\Facades\Log::info("Found " . $tasks->count() . " tasks.");
 
         return response()->json($tasks);
     }
