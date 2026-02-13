@@ -18,8 +18,10 @@ export default function MobileTaskList({ user, onBack, onSelectTask }: MobileTas
         const fetchTasks = async () => {
             setLoading(true);
             try {
-                // Format date as YYYY-MM-DD
-                const dateStr = selectedDate.toISOString().split('T')[0];
+                // Format date as YYYY-MM-DD (Local Time)
+                const offset = selectedDate.getTimezoneOffset();
+                const localDate = new Date(selectedDate.getTime() - (offset * 60 * 1000));
+                const dateStr = localDate.toISOString().split('T')[0];
                 const response = await fetch(`http://localhost:8000/api/crews/${user.user_id}/tasks?date=${dateStr}`, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
