@@ -22,7 +22,7 @@ export default function MobileTaskList({ user, onBack, onSelectTask }: MobileTas
                 const offset = selectedDate.getTimezoneOffset();
                 const localDate = new Date(selectedDate.getTime() - (offset * 60 * 1000));
                 const dateStr = localDate.toISOString().split('T')[0];
-                const response = await fetch(`http://localhost:8000/api/crews/${user.user_id}/tasks?date=${dateStr}`, {
+                const response = await fetch(`/api/crews/${user.user_id}/tasks?date=${dateStr}`, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
                     }
