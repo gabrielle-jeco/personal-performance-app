@@ -68,8 +68,7 @@ const CrewLayout: React.FC<CrewLayoutProps> = ({ children, title = "Dashboard", 
                 <div className="h-24 w-full shrink-0"></div>
 
                 {/* Main Content */}
-                {/* if !allowScroll: Fill remaining height exactly and flex-col for children to manage scroll */}
-                <main className={`bg-gray-50 rounded-t-[30px] min-h-[calc(100vh-6rem)] w-full px-6 py-6 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] relative z-20`}>
+                <main className={`bg-gray-50 rounded-t-[30px] w-full px-6 py-6 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] relative z-20 ${allowScroll ? 'min-h-[calc(100vh-6rem)]' : 'h-[calc(100vh-6rem)] overflow-hidden flex flex-col'}`}>
                     {children}
 
                     {/* Bottom Padding only needed for scrollable main */}
