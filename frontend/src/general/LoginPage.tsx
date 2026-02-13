@@ -29,7 +29,7 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
             }
 
             // Success
-            console.log('Login Success:', data);
+
 
             // Store token for API requests
             localStorage.setItem('auth_token', data.access_token);
