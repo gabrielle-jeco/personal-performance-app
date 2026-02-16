@@ -201,10 +201,10 @@ export default function CrewDetail({ crew }: CrewDetailProps) {
 
             <div className="items-center justify-between hidden lg:flex mb-6"></div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full min-h-0">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 h-full min-h-0">
 
                 {/* 1. Left Panel (Profile & Calendar) - Col Span 3 */}
-                <div className="lg:col-span-3 flex flex-col gap-6 h-full overflow-y-auto pr-2">
+                <div className="lg:col-span-4 xl:col-span-3 flex flex-col gap-4 lg:gap-6 h-full overflow-y-auto pr-2">
                     <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
                         <h2 className="text-xl font-bold text-primary mb-1">{crew.name}</h2>
                         <p className="text-xs text-gray-500 mb-4">
@@ -383,8 +383,8 @@ export default function CrewDetail({ crew }: CrewDetailProps) {
                     </div>
                 </div>
 
-                {/* 2. Middle Panel (Task List) - Col Span 5 */}
-                <div className="lg:col-span-5 flex flex-col h-full overflow-hidden">
+                {/* 2. Middle Panel (Task List) - Col Span 5 (XL) / 4 (LG) */}
+                <div className="lg:col-span-4 xl:col-span-5 flex flex-col h-full overflow-hidden">
                     {viewMode === 'TASKS' ? (
                         <>
                             {/* Header */}
@@ -451,7 +451,7 @@ export default function CrewDetail({ crew }: CrewDetailProps) {
                 </div>
 
                 {/* 3. Right Panel (Activity) - Col Span 4 */}
-                <div className="lg:col-span-4 flex flex-col h-full ease-in-out duration-300">
+                <div className="lg:col-span-4 xl:col-span-4 flex flex-col h-full ease-in-out duration-300">
                     {/* Render Logic: If Activity Mode OR Eval Mode -> Show Stats/Eval. Else (Preview/History) -> Show Preview/History */}
                     {(rightPanelMode === 'ACTIVITY' || viewMode === 'EVALUATION') ? (
                         viewMode === 'EVALUATION' ? (
