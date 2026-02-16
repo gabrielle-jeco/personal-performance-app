@@ -29,7 +29,7 @@ const SupervisorDashboardMobile: React.FC<DashboardProps> = ({ onNavigate }) => 
     };
 
     return (
-        <MobileLayout title="Dashboard" allowScroll={false}>
+        <MobileLayout title="Dashboard" allowScroll={true}>
             {/* 1. Identity Card (Crew Style) */}
             <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 relative overflow-hidden mb-6">
                 <div className="flex justify-between items-start mb-4">
