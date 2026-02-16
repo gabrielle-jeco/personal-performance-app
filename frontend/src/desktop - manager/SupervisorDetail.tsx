@@ -212,8 +212,8 @@ export default function SupervisorDetail({ supervisor }: SupervisorDetailProps) 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full min-h-0">
 
                 {/* 1. Left Panel (Profile & Controls) - Col Span 3 */}
-                {/* 1. Left Panel (Profile & Controls) - Compact: Span 5, Full: Span 3 */}
-                <div className="lg:col-span-5 xl:col-span-5 2xl:col-span-3 flex flex-col gap-6 h-full overflow-y-auto pr-2">
+                {/* 1. Left Panel (Profile & Controls) - Compact: Span 4, Full: Span 3 */}
+                <div className="lg:col-span-4 xl:col-span-4 2xl:col-span-3 flex flex-col gap-6 h-full overflow-y-auto pr-2">
 
                     {/* Profile Card */}
                     <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
@@ -494,8 +494,8 @@ export default function SupervisorDetail({ supervisor }: SupervisorDetailProps) 
                 </div>
 
                 {/* 3. Right Panel (Activity Stats OR Preview) - Col Span 4 */}
-                {/* 3. Right Panel (Activity Stats OR Preview) - Compact: Span 3, Full: Span 4 */}
-                <div className="lg:col-span-3 xl:col-span-3 2xl:col-span-4 flex flex-col h-full ease-in-out duration-300">
+                {/* 3. Right Panel (Activity Stats OR Preview) - Compact: Span 4, Full: Span 4 */}
+                <div className="lg:col-span-4 xl:col-span-4 2xl:col-span-4 flex flex-col h-full ease-in-out duration-300">
 
                     {(rightPanelMode === 'STATS' || viewMode === 'EVALUATION') ? (
                         viewMode === 'EVALUATION' ? (
