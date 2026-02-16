@@ -20,7 +20,7 @@ export default function SupervisorList({ data, selectedId, onSelect, selectedLoc
     };
 
     return (
-        <div className="bg-white h-full border-r border-gray-200 flex flex-col w-full md:w-96 flex-shrink-0 z-10">
+        <div className="bg-white h-full border-r border-gray-200 flex flex-col w-full md:w-64 lg:w-64 xl:w-64 2xl:w-96 flex-shrink-0 z-10 transition-all duration-300">
             {/* Header Area (Profile moved here) */}
             <div className="p-8 pb-4">
                 <h1 className="text-xl font-bold text-gray-900 mb-6">Employee</h1>
