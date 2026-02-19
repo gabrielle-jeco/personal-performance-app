@@ -1,36 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { Camera, X, Trash2, CheckCircle, Image as ImageIcon, Calendar, User, ChevronLeft, ChevronRight } from 'lucide-react';
-import MobileEvidenceListModal from './MobileEvidenceListModal';
-import MobileCrewTaskPreview from './MobileCrewTaskPreview';
+import { Camera, X, Trash2, CheckCircle, Image as ImageIcon, ChevronLeft } from 'lucide-react';
+import MobileEvidenceListModal from '../mobile - crew/MobileEvidenceListModal';
+import MobileCrewTaskPreview from '../mobile - crew/MobileCrewTaskPreview';
 import MobileActionModal from '../general/MobileActionModal';
 import MobileCameraCapture from '../general/MobileCameraCapture';
 
-interface MobileTaskExecutionProps {
+interface MobileSupervisorTaskDetailProps {
     task: any;
     onClose: () => void;
+    // Supervisor uses different API endpoint logic maybe? 
+    // But we will use onUpload prop to abstract it.
     onUpload: (formData: FormData) => Promise<void>;
 }
 
-export default function MobileTaskExecution({ task, onClose, onUpload }: MobileTaskExecutionProps) {
-    // Calculated State (Moved up for init)
+export default function MobileSupervisorTaskDetail({ task, onClose, onUpload }: MobileSupervisorTaskDetailProps) {
+    // Calculated State
+    const isApproved = task.status === 'approved';
     const isPastDue = new Date(task.due_at) < new Date(new Date().setHours(0, 0, 0, 0));
-    const isReadOnly = task.status === 'approved' || task.status === 'submitted' || task.status === 'completed' || isPastDue;
+    const isReadOnly = isApproved || isPastDue;
 
     const [animateIn, setAnimateIn] = useState(false);
 
     // View States
-    const [showHistory, setShowHistory] = useState(false); // Acts as "Preview Mode"
-    const [showEvidenceList, setShowEvidenceList] = useState(isReadOnly); // Acts as "List Mode" (Init with ReadOnly)
-
-    // Upload State (Preview only, real data comes from task or fresh upload)
-    const [beforePreview, setBeforePreview] = useState<string | null>(task.before_image ? (task.before_image.startsWith('http') ? task.before_image : `/storage/${task.before_image}`) : null);
-    const [afterPreview, setAfterPreview] = useState<string | null>(task.after_image ? (task.after_image.startsWith('http') ? task.after_image : `/storage/${task.after_image}`) : null);
-
-    // Loading State
-    const [isUploading, setIsUploading] = useState(false);
-
-    // Preview State
-    const [activeTab, setActiveTab] = useState<'before' | 'after'>('before');
+    const [showEvidenceList, setShowEvidenceList] = useState(isReadOnly);
+    const [showHistory, setShowHistory] = useState(false); // Preview
 
     // Modal State
     const [showActionModal, setShowActionModal] = useState(false);
@@ -39,9 +32,16 @@ export default function MobileTaskExecution({ task, onClose, onUpload }: MobileT
     // Camera State
     const [showCamera, setShowCamera] = useState(false);
 
+    // Upload State (Preview only)
+    const [beforePreview, setBeforePreview] = useState<string | null>(task.before_image ? (task.before_image.startsWith('http') ? task.before_image : `/storage/${task.before_image}`) : null);
+    const [afterPreview, setAfterPreview] = useState<string | null>(task.after_image ? (task.after_image.startsWith('http') ? task.after_image : `/storage/${task.after_image}`) : null);
+    const [isUploading, setIsUploading] = useState(false);
+
+    // Preview State
+    const [activeTab, setActiveTab] = useState<'before' | 'after'>('before');
+
     // Hidden Input Refs
     const galleryInputRef = React.useRef<HTMLInputElement>(null);
-
 
     useEffect(() => {
         setAnimateIn(true);
@@ -62,9 +62,26 @@ export default function MobileTaskExecution({ task, onClose, onUpload }: MobileT
         setShowActionModal(false);
     };
 
+    const handleClose = () => {
+        if (showEvidenceList) {
+            if (isReadOnly) {
+                onClose();
+            } else {
+                setShowEvidenceList(false);
+            }
+        } else {
+            onClose();
+        }
+    };
+
+    const handleHistoryClick = () => {
+        setShowActionModal(false);
+        setShowEvidenceList(true);
+    };
+
     const handleCameraCapture = async (file: File) => {
         setShowCamera(false);
-        if (!activeUploadType) return;
+        if (isReadOnly || !activeUploadType) return;
 
         const previewUrl = URL.createObjectURL(file);
         if (activeUploadType === 'before') setBeforePreview(previewUrl);
@@ -85,28 +102,8 @@ export default function MobileTaskExecution({ task, onClose, onUpload }: MobileT
         }
     };
 
-    const handleClose = () => {
-        if (showEvidenceList) {
-            if (isReadOnly) {
-                onClose(); // Close app/modal directly if read-only
-            } else {
-                // Level 2: Close List -> Return to Upload View
-                setShowEvidenceList(false);
-            }
-        } else {
-            // Level 3: Close Entire Modal -> Return to Dashboard
-            onClose();
-        }
-    };
-
-    const handleHistoryClick = () => {
-        // Open List View
-        setShowActionModal(false);
-        setShowEvidenceList(true);
-    };
-
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (isReadOnly || !activeUploadType) return; // Prevent upload in read-only mode or if no type
+        if (isReadOnly || !activeUploadType) return;
 
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
@@ -127,14 +124,13 @@ export default function MobileTaskExecution({ task, onClose, onUpload }: MobileT
                 alert("Upload failed");
             } finally {
                 setIsUploading(false);
-                // Reset input
                 e.target.value = '';
             }
         }
     };
 
     const handleDeleteEvidence = async (type: 'before' | 'after') => {
-        if (isReadOnly) return; // Prevent delete in read-only mode
+        if (isReadOnly) return;
 
         try {
             const token = localStorage.getItem('auth_token');
@@ -155,18 +151,10 @@ export default function MobileTaskExecution({ task, onClose, onUpload }: MobileT
         }
     };
 
-    // STACKED RENDER
     return (
         <>
-            {/* Hidden Inputs for Shared Use */}
-            <input
-                ref={galleryInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleFileChange}
-                disabled={isReadOnly}
-            />
+            {/* Hidden Inputs */}
+            <input ref={galleryInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} disabled={isReadOnly} />
 
             {showCamera && (
                 <MobileCameraCapture
@@ -175,17 +163,14 @@ export default function MobileTaskExecution({ task, onClose, onUpload }: MobileT
                 />
             )}
 
-            {/* 1. Underlying Upload View: Only Render if NOT Read Only (Prevent Ghosting) */}
+            {/* 1. Underlying Upload View */}
             {!isReadOnly && (
                 <div key="upload-view" className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-                    {/* Backdrop */}
                     <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={handleClose}></div>
-
-                    {/* Modal Content */}
                     <div className="bg-white w-full max-w-sm rounded-[2rem] p-6 shadow-2xl z-10 animate-fade-in-up">
 
                         <div className="flex justify-between items-center mb-4">
-                            <h3 className="font-bold text-gray-800 text-lg">Upload Evidence</h3>
+                            <h3 className="font-bold text-gray-800 text-lg">Supervisor Checklist</h3>
                             <button onClick={handleClose} className="p-2 bg-gray-100 rounded-full text-gray-500 hover:bg-gray-200">
                                 <X size={20} />
                             </button>
@@ -193,7 +178,7 @@ export default function MobileTaskExecution({ task, onClose, onUpload }: MobileT
 
                         {/* Upload Grid */}
                         <div className="grid grid-cols-2 gap-4 mb-6">
-                            {/* Before Button Slot */}
+                            {/* Before Slot */}
                             <div className="relative group">
                                 <div
                                     onClick={() => handleSlotClick('before')}
@@ -217,7 +202,7 @@ export default function MobileTaskExecution({ task, onClose, onUpload }: MobileT
                                 </div>
                             </div>
 
-                            {/* After Button Slot */}
+                            {/* After Slot */}
                             <div className="relative group">
                                 <div
                                     onClick={() => handleSlotClick('after')}
@@ -242,18 +227,12 @@ export default function MobileTaskExecution({ task, onClose, onUpload }: MobileT
                             </div>
                         </div>
 
-                        {/* Footer Actions (History & Done) */}
+                        {/* Footer Actions */}
                         <div className="flex items-center gap-3">
-                            <button
-                                onClick={handleHistoryClick}
-                                className="flex-1 bg-gray-100 text-gray-700 font-bold py-3.5 rounded-full shadow-sm active:scale-95 transition-transform text-sm hover:bg-gray-200"
-                            >
+                            <button onClick={handleHistoryClick} className="flex-1 bg-gray-100 text-gray-700 font-bold py-3.5 rounded-full shadow-sm active:scale-95 transition-transform text-sm hover:bg-gray-200">
                                 History
                             </button>
-                            <button
-                                onClick={handleClose}
-                                className="flex-1 bg-blue-600 text-white font-bold py-3.5 rounded-full shadow-lg active:scale-95 transition-transform text-sm hover:bg-blue-700"
-                            >
+                            <button onClick={handleClose} className="flex-1 bg-blue-600 text-white font-bold py-3.5 rounded-full shadow-lg active:scale-95 transition-transform text-sm hover:bg-blue-700">
                                 Done
                             </button>
                         </div>
@@ -261,7 +240,6 @@ export default function MobileTaskExecution({ task, onClose, onUpload }: MobileT
                 </div>
             )}
 
-            {/* Action Popup Modal */}
             <MobileActionModal
                 isOpen={showActionModal}
                 onClose={() => setShowActionModal(false)}
@@ -270,8 +248,6 @@ export default function MobileTaskExecution({ task, onClose, onUpload }: MobileT
                 onHistory={handleHistoryClick}
             />
 
-
-            {/* 2. Evidence List Overlay (Portaled on top) */}
             <MobileEvidenceListModal
                 isOpen={showEvidenceList}
                 onClose={handleClose}
@@ -290,7 +266,6 @@ export default function MobileTaskExecution({ task, onClose, onUpload }: MobileT
                 readOnly={isReadOnly}
             />
 
-            {/* 3. Preview Overlay */}
             <MobileCrewTaskPreview
                 task={task}
                 isOpen={showHistory}
