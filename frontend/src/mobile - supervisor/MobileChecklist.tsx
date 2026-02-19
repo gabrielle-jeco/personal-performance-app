@@ -2,8 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Camera, Check, ChevronDown } from 'lucide-react';
 import MobileLayout from './MobileLayout';
 import MobileTaskPreview from './MobileTaskPreview';
-import MobileUploadModal from './MobileUploadModal';
-import MobileEvidenceListModal from '../mobile - crew/MobileEvidenceListModal';
+import MobileSupervisorTaskDetail from './MobileSupervisorTaskDetail';
 
 interface MobileChecklistProps {
     supervisor: any; // The logged-in supervisor
@@ -33,13 +32,7 @@ const MobileChecklist: React.FC<MobileChecklistProps> = ({ supervisor, onNavigat
         return Array.from({ length: 12 }, (_, i) => i);
     };
 
-    // Preview & Upload
-    const [previewTask, setPreviewTask] = useState<any>(null);
-    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-    const [isEvidenceListOpen, setIsEvidenceListOpen] = useState(false); // NEW State
-
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    const [uploadingTaskId, setUploadingTaskId] = useState<number | null>(null);
+    // Upload & Detail State
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const [selectedTaskForUpload, setSelectedTaskForUpload] = useState<any>(null);
 
@@ -67,89 +60,13 @@ const MobileChecklist: React.FC<MobileChecklistProps> = ({ supervisor, onNavigat
         }
     };
 
-    const handleDeleteProof = async (taskId: number) => {
-        // ... (Same logic for deleting proof if needed, or disable for supervisor if manager controls it?
-        // Usually supervisor can delete their own proof before approval)
-        try {
-            const token = localStorage.getItem('auth_token');
-            const res = await fetch(`/api/tasks/${taskId}/proof`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                setMyTasks(myTasks.map(t => t.task_id === taskId ? { ...t, proof_image: null } : t));
-                if (previewTask?.task_id === taskId) setPreviewTask({ ...previewTask, proof_image: null });
-            }
-        } catch (error) {
-            console.error("Failed to delete proof", error);
-        }
-    };
-
-    const handleViewPhoto = (task: any) => {
-        setPreviewTask({
-            ...task,
-            proof_image: task.proof_image || 'https://placehold.co/600x400/png',
-            before_image: task.before_image || 'https://placehold.co/600x400/png',
-            after_image: task.after_image || 'https://placehold.co/600x400/png'
-        });
-        setIsEvidenceListOpen(true); // Open List instead of Preview directly
-    };
-
-    // --- UPLOAD LOGIC ---
-    const handleCameraClick = (task: any) => {
+    // --- NEW LOGIC: UNIFIED DETAIL & UPLOAD ---
+    const handleTaskClick = (task: any) => {
         setSelectedTaskForUpload(task);
         setIsUploadModalOpen(true);
     };
 
-    const triggerFileUpload = (capture: boolean) => {
-        if (!selectedTaskForUpload) return;
-        setUploadingTaskId(selectedTaskForUpload.task_id);
 
-        if (fileInputRef.current) {
-            if (capture) {
-                fileInputRef.current.setAttribute('capture', 'environment');
-            } else {
-                fileInputRef.current.removeAttribute('capture');
-            }
-            fileInputRef.current.click();
-        }
-        setIsUploadModalOpen(false); // Close modal after selection
-    };
-
-    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (!file || !uploadingTaskId) return;
-
-        // Optimistic UI update could go here, but let's wait for basic upload first
-        const formData = new FormData();
-        formData.append('proof_image', file);
-
-        try {
-            const token = localStorage.getItem('auth_token');
-            const res = await fetch(`/api/tasks/${uploadingTaskId}/proof`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` },
-                body: formData
-            });
-
-            if (res.ok) {
-                // Refresh tasks to get new image URL
-                // Alternatively, read response if it returns the new image URL
-                const data = await res.json();
-                setMyTasks(myTasks.map(t => t.task_id === uploadingTaskId ? { ...t, proof_image: data.proof_image_url || 'temp_placeholder' } : t));
-                // Reload clean data
-                fetchMyTasks();
-            } else {
-                alert("Upload failed");
-            }
-        } catch (error) {
-            console.error("Upload error", error);
-            alert("Upload error");
-        } finally {
-            setUploadingTaskId(null);
-            if (fileInputRef.current) fileInputRef.current.value = ''; // Reset input
-        }
-    };
 
     const completedCount = myTasks.filter(t => t.status === 'approved').length;
     const totalCount = myTasks.length;
@@ -221,14 +138,7 @@ const MobileChecklist: React.FC<MobileChecklistProps> = ({ supervisor, onNavigat
                 onBack={() => onNavigate('DASHBOARD')}
                 allowScroll={false}
             >
-                {/* ... hidden inputs & modals ... */}
-                <input
-                    type="file"
-                    ref={fileInputRef}
-                    style={{ display: 'none' }}
-                    accept="image/*"
-                    onChange={handleFileChange}
-                />
+
 
 
 
@@ -335,7 +245,7 @@ const MobileChecklist: React.FC<MobileChecklistProps> = ({ supervisor, onNavigat
 
                                     <div className="flex flex-col gap-2">
                                         <button
-                                            onClick={() => isReadOnly ? handleViewPhoto(task) : handleCameraClick(task)}
+                                            onClick={() => handleTaskClick(task)}
                                             className="bg-blue-600 text-white shadow-blue-200 text-[10px] font-bold py-2 px-4 rounded-xl shadow-md active:scale-95 transition-transform flex items-center gap-1"
                                         >
                                             <Camera size={14} />
@@ -351,37 +261,26 @@ const MobileChecklist: React.FC<MobileChecklistProps> = ({ supervisor, onNavigat
                 </div>
             </MobileLayout>
 
-            {/* Evidence List Modal (Shows First) */}
-            <MobileEvidenceListModal
-                isOpen={isEvidenceListOpen}
-                onClose={() => setIsEvidenceListOpen(false)}
-                task={previewTask}
-                onSelectImage={() => setIsPreviewOpen(true)}
-                onDelete={(type) => {
-                    if (type === 'proof') handleDeleteProof(previewTask.task_id);
-                }}
-                readOnly={previewTask?.status === 'approved' || (previewTask && new Date(previewTask.due_at) < new Date(new Date().setHours(0, 0, 0, 0)))}
-            />
-
-            {/* Preview Modal (Shows Second, on top) */}
-            <MobileTaskPreview
-                isOpen={isPreviewOpen}
-                onClose={() => setIsPreviewOpen(false)} // Just close preview, List stays open
-                task={previewTask}
-                onDeleteProof={handleDeleteProof}
-                readOnly={previewTask?.status === 'approved' || (previewTask && new Date(previewTask.due_at) < new Date(new Date().setHours(0, 0, 0, 0)))}
-            />
-
-            <MobileUploadModal
-                isOpen={isUploadModalOpen}
-                onClose={() => setIsUploadModalOpen(false)}
-                onUpload={() => triggerFileUpload(false)}
-                onTakePhoto={() => triggerFileUpload(true)}
-                onHistory={() => {
-                    // Keep Upload Modal open so 'Back' returns to it
-                    if (selectedTaskForUpload) handleViewPhoto(selectedTaskForUpload);
-                }}
-            />
+            {/* Detail / Upload Modal (Replacing Old Modals) */}
+            {selectedTaskForUpload && isUploadModalOpen && (
+                <MobileSupervisorTaskDetail
+                    task={selectedTaskForUpload}
+                    onClose={() => {
+                        setIsUploadModalOpen(false);
+                        setSelectedTaskForUpload(null);
+                        fetchMyTasks(); // Refresh on close
+                    }}
+                    onUpload={async (formData) => {
+                        const token = localStorage.getItem('auth_token');
+                        await fetch(`/api/tasks/${selectedTaskForUpload.task_id}/evidence`, { // Use EVIDENCE endpoint now
+                            method: 'POST',
+                            headers: { 'Authorization': `Bearer ${token}` },
+                            body: formData
+                        });
+                        // No need to set state here, component handles preview
+                    }}
+                />
+            )}
         </>
     );
 };
