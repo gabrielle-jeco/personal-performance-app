@@ -201,6 +201,7 @@ export default function SupervisorDetail({ supervisor }: SupervisorDetailProps) 
                 onClose={() => setIsTaskModalOpen(false)}
                 onSubmit={handleAddTask}
                 defaultDate={selectedDate.toLocaleDateString('en-CA')}
+                showCategory={false} // Managers do not assign tasks by workstation 
             />
 
             {/* Top Banner (Overlay Style) */}
