@@ -35,6 +35,7 @@ All accounts below use the same password:
 
 * `anton_mgr`
 * `surya_spv`
+* `andi_spv`
 * `budi_crew`
 * `deni_crew`
 
